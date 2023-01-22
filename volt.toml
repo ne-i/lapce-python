@@ -8,3 +8,11 @@ icon = "python-logo-only.png"
 
 [activation]
 language = ["python"]
+
+[config."volt.serverPath"]
+default = ""
+description = "Path to pylsp bin e.g. /home/me/project/venv/bin/pylsp"
+
+[config."volt.serverArgs"]
+default = []
+description = "Arguments to pass to the LSP server during launch"

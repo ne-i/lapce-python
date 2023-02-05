@@ -1,7 +1,10 @@
 use anyhow::{anyhow, Result};
 use lapce_plugin::{
     psp_types::{
-        lsp_types::{request::Initialize, DocumentFilter, DocumentSelector, InitializeParams, Url},
+        lsp_types::{
+            request::Initialize, DocumentFilter, DocumentSelector, InitializeParams,
+            InitializeResult, Url,
+        },
         Request,
     },
     register_plugin, LapcePlugin, PLUGIN_RPC,
@@ -31,15 +34,15 @@ register_plugin!(State);
 macro_rules! ok {
     ( $x:expr ) => {
         match ($x) {
-        | Ok(v) => v,
-        | Err(e) => return Err(anyhow!(e)),
+            Ok(v) => v,
+            Err(e) => return Err(anyhow!(e)),
         }
     };
 }
 
 fn initialize(params: InitializeParams) -> Result<()> {
     // PLUGIN_RPC.stderr("Initializing python-lapce");
-    
+
     let document_selector: DocumentSelector = vec![DocumentFilter {
         language: Some(String::from("python")),
         pattern: Some(String::from("**.py")),
@@ -89,6 +92,10 @@ impl LapcePlugin for State {
             Initialize::METHOD => {
                 let params: InitializeParams = serde_json::from_value(params).unwrap();
                 let _ = initialize(params);
+                // we need success response because of this:
+                // https://github.com/lapce/lapce/pull/2087
+                // see https://github.com/hbina/lapce-rust/blob/hbina-refactor-to-latest-lib/src/main.rs
+                PLUGIN_RPC.host_success(_id, InitializeResult::default())
             }
             _ => {}
         }
